@@ -1,0 +1,320 @@
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <style>
+        html,
+        body {
+            background-image: "http://image.tmdb.org/t/p/w154/"+ {
+                    {
+                    data.backdrop_path
+                }
+            }
+            ;
+            !important;
+        }
+
+        a.btn {
+            border-radius: .25rem;
+            border: 1px solid transparent;
+            padding: .5rem 1rem;
+            color: #fff;
+        }
+
+        a.btn:hover {
+            border-radius: .25rem;
+        }
+
+        button:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+
+        #thing {
+            float: left;
+            height: 400px;
+        }
+    </style>
+</head>
+
+<body class="bg-secondary">
+
+    <header class="d-flex justify-content-between bg-dark text-light p-2">
+        <span class="w-75">
+            <div class="input-group mb-3 w-50">
+                <div class="input-group-prepend">
+                         
+            {{!--<div>--}}
+            {{!--    <img src="img/accountdefault.png"width="64" height = "64" class="rounded-circle m-2"/>--}}
+            {{!--</div>--}}
+
+                </div>
+            </div>
+                <h1 id="displayUsername"></h1>
+            <div>
+            </div>
+            
+            <div id="bitchreview">
+                <input id="searchfield" type="text" class="form-control" aria-label="Text input with dropdown button" placeholder="Invite Link" readonly>
+            </div>
+            
+        </span>
+        <span class = "d-flex flex-column justify-content-center">
+            <div>
+
+
+            </div>
+            <div>
+                <a id="signIn" class="btn btn-info" href = "/login" role = "button">Sign In</a>
+                <a id="signOut" class="btn btn-info" role = "button">Sign Out</a>
+            </div>
+            
+        </span>
+    </header>
+    <!--MODAL STUFF HERE ///////////////////////////////////////////////////////////-->
+    <div class="modal" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Time Slot</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="d-flex mb-3 justify-content-between">
+                    <span>Date:</span> <input type="date" id="addDAte"><br>
+                    </div><div class="d-flex mb-3 justify-content-between">
+                    <span>Start Time:</span> <input type="time" id="addStart"><br>
+                    </div><div class="d-flex mb-3 justify-content-between">
+                    <span>End Time:</span> <input type="time" id="addEnd"><br>
+                    </div>
+                    <div id="result"></div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="addSlot">Add Slot</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!--/////////////////////////////////////////////////////////////////////////////-->
+    <div class="d-flex justify-content-center">
+        <div id="main" class="w-75 h-100 bg-light rounded-bottom bg-light rounded-bottom p-3" style="height: 100%;">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">Duration</th>
+                    <th scope="col">Booked By</th>
+                    <th scope="col"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                        Add Time Slot
+                    </button></th>
+                </tr>
+                </thead>
+                <tbody id="in">
+
+                </tbody>
+            </table>
+        </div>
+
+
+
+        <hr class="m-3">
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script>
+    var currentReview = 0;
+        //display username of who is logged in
+        $('#displayUsername').html("{{logged}}");
+
+        $(document).ready(function() {
+
+            $.ajax({
+                type: "POST",
+                url: "/users/getbookings",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    pageOwner: "{{logged}}"
+                }),
+                success: function(result, status) {
+                    console.log(result);
+                    console.log(result.success);
+                    if (result.response) {
+                        console.log(result);
+                    }
+                    else {
+                        console.log(result.message);
+                    }
+
+                    console.log("result is this: ", result);
+                    console.log("please work ", result.retrievedReviews[0].userid);
+
+                    for (let i = 0; i < result.retrievedReviews.length; i++) {
+                        let booked = result.retrievedReviews[i].booked;
+                        if (booked == null){
+                            booked = "Not Booked";
+                        }
+                        $("#in").append(`
+                                    <tr>
+                                            <th class="font-weight-bold">${result.retrievedReviews[i].Date}</th>
+                                            <th class="font-weight-bold">${result.retrievedReviews[i].Start}</th>
+                                            <th class="font-weight-bold">${result.retrievedReviews[i].Duration}</th>
+                                            <th class="font-weight-bold">${booked}</th>
+                                            <th>
+                                            <button type='button' id="ebutton${i}" class='btn btn-info' value="${result.retrievedReviews[i].sheduleId}" >Details</button>
+                                            <button type='button' id="dbutton${i}" class="btn btn-info" value="${result.retrievedReviews[i].sheduleId}" >Delete</button>
+                                            </th>
+                                        
+                                    </tr>
+                                    `);
+                        $(`#ebutton${i}`).click(function() { editReview(`${result.retrievedReviews[i].reviewid}`) });
+                        $(`#dbutton${i}`).click(function() { deleteReview(`${result.retrievedReviews[i].reviewid}`) });
+                    }
+                }
+            });
+            
+            function deleteReview(id) {
+                
+                
+                $.ajax({
+                    url: "/users/deleteReview",
+                    method: "POST",
+                    data: {
+                        reviewid: id
+                    }
+                    ,
+                    success: function(result, status) {
+                        console.log(result);
+
+                        if (result.successful) {
+                        }
+                        else {
+                            $("#errorMessage").html(result.message).css("color", 'red');
+                        }
+                    }
+                }); //ajax
+                location.reload();
+            }
+
+            function editReview(id)
+            {
+                $("#bitchreview").append(`
+                    <h6>Review</h6>
+                    <textarea id='review' class='form-control replace' rows='3' maxlength='500' ></textarea>
+                    <h6 class='replace'> Rating 1-10</h6>
+                    <input id='score' type='number' min='1' max='10'>
+                    <div id='result' class='text-center replace'></div>
+                    <button id='newSubmit' class='m-1 text-center btn btn-info class'>Submit Review</button>
+                    `);
+                    currentReview = id;
+            }
+
+
+            if ("{{loggedIn}}") {
+                $("#signIn").hide();
+                $(".btns").show();
+            }
+            else {
+                $("#signOut").hide();
+                $(".btns").hide();
+            }
+
+            $("#signOut").on("click", logout);
+
+            function logout() {
+                $.ajax({
+                    url: "/login/signOut",
+                    method: "GET",
+                    success: function(result, status) {
+                        console.log(result);
+                        
+                        if (result.successful) {
+                            window.location.href = "/";
+                        }
+                        else {
+                            $("#errorMessage").html(result.message).css("color", 'red');
+                        }
+                    }
+                }); //ajax
+            }
+
+            function isValid() {
+                var result = true;
+                
+                if ($("#addDAte").val() === "") {
+                    result = false;
+                    $("#result").html("Date required");
+                    $("#result").css("color", "red");
+                }
+                else if ($("#addStart").val() === "") {
+                    result = false;
+                    $("#result").html("Start Time required");
+                    $("#result").css("color", "red");
+                }
+                else if ($("#addEnd").val() === "") {
+                    result = false;
+                    $("#result").html("End Time required");
+                    $("#result").css("color", "red");
+                }else if ($("#addEnd").val() <= $("#addStart").val()){
+                    result= false;
+                    $("#result").html("End Time must be after Start Time");
+                    $("#result").css("color", "red");
+                }
+                else {
+                    $("#result").html("");
+                    $("#result").css("color", "green");
+                }
+                return result;
+            }
+            function addSlot() {
+
+            }
+            $(document).on("click", "#addSlot", function() {
+                console.log("review:", $("#addDAte").val());
+                console.log("score:", $("#addStart").val());
+                console.log("score:", $("#addEnd").val());
+                if (isValid()) {
+                    $("#myModal").modal().hide();
+                    console.log("it was valid, bitch");
+                    $.ajax({
+                        type: "POST",
+                        url: "/users/review",
+                        dataType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            Date: $("#addDAte").val(),
+                            Start: $("#addStart").val(),
+                            End: $("#addEnd").val()
+                        }),
+                        success: function(data, status) {
+                            console.log(data);
+                            console.log(data.success);
+                            if (data.response) {
+                                console.log(data);
+                                location.reload();
+                            }
+                            else {
+                                console.log(data.message);
+                            }
+                        }
+                    });
+                }
+            });
+
+        });
+    </script>
+</body>
