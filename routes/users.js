@@ -54,14 +54,6 @@ WHERE username = "${username}"
   connection.end();
   console.log("over");
 });
-router.post('/review', function (req,res,next) {
-  //Do a mysql call to database to add reviews
-  //return success or failure
-});
-router.post('/movie',function (req,res,next) {
-  //add movie to database if already not in database
-  //use this link if a ajax call is made in adding movie gets a result in the movie page
-});
 router.post('/getuser',function (req,res,next) {
 console.log(req.body);
 });
@@ -125,22 +117,49 @@ WHERE user_table.userId = "${pageOwnerId}";
     });
     dconnection.end();
 });
+router.post("/getbooking",function (req,res,next) {
+    console.log(req.body);
+    let pageOwnerId = req.body.slotId;
+
+    const dconnection = mysql.createConnection({
+        host: 'd5x4ae6ze2og6sjo.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
+        user: 'ux0er26era80bb09',
+        password: 'xn9oqgy1x6zuloe5',
+        database: 'xrcczq694g92zyim'
+    });
+    dconnection.connect();
+
+    dconnection.query(`
+SELECT *
+FROM schedule_table
+WHERE sheduleId = "${pageOwnerId}";
+`, function(error, results, fields){
+        console.log("here are the reviews: ", results);
+        console.log(error);
+        if (error) throw error;
+        res.json({
+            response: "Successfully retrieved review",
+            retrievedReviews: results
+        });
+    });
+    dconnection.end();
+});
 
 router.post("/deletebooking",function (req,res,next) {
     console.log(req.body);
-    let reviewid = req.body.reviewid
+    let reviewid = req.body.slotId;
     console.log("js id", reviewid);
     const dconnection = mysql.createConnection({
-        host: 'if0ck476y7axojpg.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
-        user: 'ek6fr7bzgpv230y8',
-        password: 'acdcp33j961libcw',
-        database: 'c5qwwjxdop5awyw3'
+        host: 'd5x4ae6ze2og6sjo.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
+        user: 'ux0er26era80bb09',
+        password: 'xn9oqgy1x6zuloe5',
+        database: 'xrcczq694g92zyim'
     });
     dconnection.connect();
     dconnection.query(`
 DELETE
-FROM review_table
-WHERE reviewid = "${reviewid}"
+FROM schedule_table
+WHERE sheduleId = "${reviewid}"
 `, function(error, results, fields){
         console.log("here are the reviews: ", results);
         console.log(error);
@@ -153,34 +172,7 @@ WHERE reviewid = "${reviewid}"
     dconnection.end();
 });
 
-router.post("/updatebooking",function (req,res,next) {
-    console.log(req.body);
-    let reviewid = req.body.reviewid
-    let newReview = req.body.review;
-    let newDate =  new Date();
-    let newScore = req.body.score
-    
-    const dconnection = mysql.createConnection({
-        host: 'if0ck476y7axojpg.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
-        user: 'ek6fr7bzgpv230y8',
-        password: 'acdcp33j961libcw',
-        database: 'c5qwwjxdop5awyw3'
-    });
-    dconnection.connect();
-    dconnection.query(`
-UPDATE review_table
-SET review = "${newReview}", score = "${newScore}"
-WHERE reviewid = "${reviewid}"
-`, function(error, results, fields){
-        console.log("here are the reviews: ", results);
-        console.log(error);
-        if (error) throw error;
-            res.json({
-                response: "Successfully updated review"
-            });
-    });
-});
-router.post("/review", function(req, res, next) {
+router.post("/booking", function(req, res, next) {
     console.log(req.body);
     let date = req.body.Date;
     let start = req.body.Start;
@@ -195,7 +187,7 @@ router.post("/review", function(req, res, next) {
     });
     dconnection.connect();
     dconnection.query(`
-INSERT INTO schedule_table(Start,End,date,userid) VALUES(?, ?, ?, ?, ?)
+INSERT INTO schedule_table(Start,End,date,userid) VALUES(?, ?, ?, ?)
 `, [start, end,date, req.session.userid], (error, results, fields) => {
         console.log(results);
         console.log(error);

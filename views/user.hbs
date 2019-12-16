@@ -105,6 +105,35 @@
             </div>
         </div>
     </div>
+    <div class="modal" id="deletion">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="d-flex mb-3 justify-content-between">
+                        <span>Start Time:</span> <input type="text" id="removeStart" readonly><br>
+                    </div><div class="d-flex mb-3 justify-content-between">
+                    <span>End Time:</span> <input type="text" id="removeEnd" readonly><br>
+                </div><div class="d-flex mb-3 justify-content-between">
+                    <span>Are you sure you want to remove the time slot? This cannot be undone.</span> <br>
+                </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <a type="button" class="btn btn-primary text-white" id="removeSlot">Delete</a>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
     <!--/////////////////////////////////////////////////////////////////////////////-->
     <div class="d-flex justify-content-center">
         <div id="main" class="w-75 h-100 bg-light rounded-bottom bg-light rounded-bottom p-3" style="height: 100%;">
@@ -136,12 +165,10 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
     <script>
-    var currentReview = 0;
         //display username of who is logged in
         $('#displayUsername').html("{{logged}}");
 
         $(document).ready(function() {
-
             $.ajax({
                 type: "POST",
                 url: "/users/getbookings",
@@ -155,43 +182,107 @@
                     console.log(result.success);
                     if (result.response) {
                         console.log(result);
-                    }
-                    else {
+                    } else {
                         console.log(result.message);
                     }
 
                     console.log("result is this: ", result);
-                    console.log("please work ", result.retrievedReviews[0].userid);
+                    //console.log("please work ", result.retrievedReviews[0].userid);
 
                     for (let i = 0; i < result.retrievedReviews.length; i++) {
-                        let booked = result.retrievedReviews[i].booked;
-                        if (booked == null){
-                            booked = "Not Booked";
-                        }
-                        $("#in").append(`
+                        if (new Date(result.retrievedReviews[i].Date.substring(0, 10)) > new Date()) {
+                            let booked = result.retrievedReviews[i].booked;
+                            let date = result.retrievedReviews[i].Date.substring(0, 10);
+                            let start = result.retrievedReviews[i].Start.substring(0, 5);
+                            let end = result.retrievedReviews[i].End.substring(0, 5);
+                            let duration = (new Date("1970-1-1 " + end) - new Date("1970-1-1 " + start)) / 1000 / 60 / 60;
+                            let min = Math.floor((new Date("1970-1-1 " + end).getTime() - new Date("1970-1-1 " + start).getTime()) / 1000 / 60);
+                            let hour = Math.floor(min / 60);
+                            min = min % 60;
+                            duration = new Date(1970, 1, 1, hour, min);
+                            if (duration.getMinutes() <= 9) {
+                                min = "0" + min;
+                            } else {
+                                min = duration.getMinutes();
+                            }
+                            duration = duration.getHours() + ":" + min;
+                            console.log("hour", hour);
+                            console.log("min", min);
+                            let total = hour + ":" + min;
+                            console.log("duration", duration);
+                            console.log(booked);
+                            if (booked == null) {
+                                booked = "Not Booked";
+                            }
+                            if (new Date("1970-1-1 " + start) > new Date(1970, 1, 1, 12, 0, 0)) {
+                                start = new Date("1970-1-1 " + start) - new Date(1970, 1, 1, 12, 0, 0) / 1000 / 60 / 60;
+                                start = start + " PM";
+                            } else {
+                                start = start + " AM";
+                            }
+                            console.log(booked);
+                            $("#in").append(`
                                     <tr>
-                                            <th class="font-weight-bold">${result.retrievedReviews[i].Date}</th>
-                                            <th class="font-weight-bold">${result.retrievedReviews[i].Start}</th>
-                                            <th class="font-weight-bold">${result.retrievedReviews[i].Duration}</th>
+                                            <th class="font-weight-bold">${date}</th>
+                                            <th class="font-weight-bold">${start}</th>
+                                            <th class="font-weight-bold">${duration}</th>
                                             <th class="font-weight-bold">${booked}</th>
                                             <th>
-                                            <button type='button' id="ebutton${i}" class='btn btn-info' value="${result.retrievedReviews[i].sheduleId}" >Details</button>
+                                            <button type='button' id="ebutton${i}" class='btn btn-info' value="${result.retrievedReviews[i].sheduleId}" >Details</button><br>
                                             <button type='button' id="dbutton${i}" class="btn btn-info" value="${result.retrievedReviews[i].sheduleId}" >Delete</button>
                                             </th>
                                         
                                     </tr>
                                     `);
-                        $(`#ebutton${i}`).click(function() { editReview(`${result.retrievedReviews[i].reviewid}`) });
-                        $(`#dbutton${i}`).click(function() { deleteReview(`${result.retrievedReviews[i].reviewid}`) });
+                            $(`#dbutton${i}`).click(function () {
+                                passData(`${result.retrievedReviews[i].sheduleId}`)
+                            });
+                        }
                     }
                 }
             });
-            
+            function passData(id) {
+                $.ajax({
+                   url: "users/getbooking",
+                   method: "POST",
+                   data:{
+                       slotId: id
+                   },
+                    success: function (result,status) {
+                       console.log("hours",result.retrievedReviews[0].Date);
+                       console.log("year",result.retrievedReviews[0].Date.substring(0,4));
+                       console.log("month",result.retrievedReviews[0].Date.substring(5,7));
+                       console.log("day", result.retrievedReviews[0].Date.substring(8,10));
+                       let year = parseInt(result.retrievedReviews[0].Date.substring(0,4));
+                       let month = parseInt(result.retrievedReviews[0].Date.substring(5,7));
+                       let day = parseInt(result.retrievedReviews[0].Date.substring(8,10));
+                       let hour = parseInt(result.retrievedReviews[0].Start.substring(0,2));
+                       let min = parseInt(result.retrievedReviews[0].Start.substring(3,5));
+                       console.log(year);
+                       console.log(month);
+                       console.log(day);
+                       let start = new Date(year,month-1,day,hour,min);
+                       hour = parseInt(result.retrievedReviews[0].End.substring(0,2));
+                        min = parseInt(result.retrievedReviews[0].End.substring(3,5));
+                        let end = new Date(year,month-1,day,hour,min);
+                       console.log(result);
+                       console.log(result.retrievedReviews[0].Date.substring(0,10)+" "+result.retrievedReviews[0].Start.substring(0,5));
+                       //start = new Date(result.retrievedReviews[0].Date.substring(0,10) + start);
+                       console.log(start);
+                       //let end = new Date(result.retrievedReviews[0].Date + result.retrievedReviews[0].End);
+                       $("#removeStart").val(start);
+                       $("#removeEnd").val(end);
+                       $("#removeSlot").val(id);
+                       $("#deletion").modal('toggle');
+                    }
+                });
+            }
+            $(document).on("longclick", "#removeSlot",deleteReview($("#removeSlot").val()));
             function deleteReview(id) {
                 
                 
                 $.ajax({
-                    url: "/users/deleteReview",
+                    url: "/users/deletebooking",
                     method: "POST",
                     data: {
                         reviewid: id
@@ -210,18 +301,6 @@
                 location.reload();
             }
 
-            function editReview(id)
-            {
-                $("#bitchreview").append(`
-                    <h6>Review</h6>
-                    <textarea id='review' class='form-control replace' rows='3' maxlength='500' ></textarea>
-                    <h6 class='replace'> Rating 1-10</h6>
-                    <input id='score' type='number' min='1' max='10'>
-                    <div id='result' class='text-center replace'></div>
-                    <button id='newSubmit' class='m-1 text-center btn btn-info class'>Submit Review</button>
-                    `);
-                    currentReview = id;
-            }
 
 
             if ("{{loggedIn}}") {
@@ -280,19 +359,16 @@
                 }
                 return result;
             }
-            function addSlot() {
-
-            }
             $(document).on("click", "#addSlot", function() {
                 console.log("review:", $("#addDAte").val());
                 console.log("score:", $("#addStart").val());
                 console.log("score:", $("#addEnd").val());
                 if (isValid()) {
-                    $("#myModal").modal().hide();
+                    //$("#myModal").modal().hide();
                     console.log("it was valid, bitch");
                     $.ajax({
                         type: "POST",
-                        url: "/users/review",
+                        url: "/users/booking",
                         dataType: "json",
                         contentType: "application/json",
                         data: JSON.stringify({
@@ -312,6 +388,7 @@
                             }
                         }
                     });
+                    console.log("after ajax");
                 }
             });
 
