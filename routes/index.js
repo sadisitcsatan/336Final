@@ -15,5 +15,7 @@ if(req.session && req.session.username && req.session.username.length){
   res.render('login', { title: 'login',success: "false" });
     console.log("pasta");
 });
-
+router.get('/rubric', function (req,res, next) {
+res.render("rubric");
+});
 module.exports = router;

@@ -59,7 +59,7 @@
 </tr>
 <tr>
 <td style="text-align:left">BD</td>
-<td style="text-align:left">Add Google Signin for app login</td>
+<td style="text-align:left; color:red">Add Google Signin for app login</td>
 <td style="text-align:left">10</td>
 </tr>
 <tr>
@@ -69,22 +69,22 @@
 </tr>
 <tr>
 <td style="text-align:left">BD</td>
-<td style="text-align:left">A banner file can be uploaded and displayed</td>
+<td style="text-align:left; color:red">A banner file can be uploaded and displayed</td>
 <td style="text-align:left">20</td>
 </tr>
 <tr>
 <td style="text-align:left">BD</td>
-<td style="text-align:left">The user can add multiple available time slots as specified</td>
+<td style="text-align:left; color:red">The user can add multiple available time slots as specified</td>
 <td style="text-align:left">10</td>
 </tr>
 <tr>
 <td style="text-align:left">BD</td>
-<td style="text-align:left">In a separate page, you show the correct list of available time slots to the user who navigates to the correct invitation URL</td>
+<td style="text-align:left; color:red">In a separate page, you show the correct list of available time slots to the user who navigates to the correct invitation URL</td>
 <td style="text-align:left">10</td>
 </tr>
 <tr>
 <td style="text-align:left">BD</td>
-<td style="text-align:left">You correctly implement booking of the appointement, including all side effects</td>
+<td style="text-align:left; color:red">You correctly implement booking of the appointement, including all side effects</td>
 <td style="text-align:left">30</td>
 </tr>
 </tbody>
