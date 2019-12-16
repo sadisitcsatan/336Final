@@ -127,7 +127,7 @@
 
                 <!-- Modal footer -->
                 <div class="modal-footer">
-                    <a type="button" class="btn btn-primary text-white" id="removeSlot">Delete</a>
+                    <a type="button" class="btn btn-primary text-white" id="removeing">Delete</a>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
                 </div>
 
@@ -272,12 +272,11 @@
                        //let end = new Date(result.retrievedReviews[0].Date + result.retrievedReviews[0].End);
                        $("#removeStart").val(start);
                        $("#removeEnd").val(end);
-                       $("#removeSlot").val(id);
+                       $("#removeing").val(id);
                        $("#deletion").modal('toggle');
                     }
                 });
             }
-            $(document).on("longclick", "#removeSlot",deleteReview($("#removeSlot").val()));
             function deleteReview(id) {
                 
                 
@@ -296,9 +295,11 @@
                         else {
                             $("#errorMessage").html(result.message).css("color", 'red');
                         }
+                        location.reload();
                     }
+
                 }); //ajax
-                location.reload();
+
             }
 
 
@@ -391,7 +392,9 @@
                     console.log("after ajax");
                 }
             });
-
+            $("#removeing").on("click",function () {
+                deleteReview($("#removeing").val());
+            });
         });
     </script>
 </body>

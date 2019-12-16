@@ -147,7 +147,7 @@ WHERE sheduleId = "${pageOwnerId}";
 
 router.post("/deletebooking",function (req,res,next) {
     console.log(req.body);
-    let reviewid = req.body.slotId;
+    let reviewid = req.body.reviewid;
     console.log("js id", reviewid);
     const dconnection = mysql.createConnection({
         host: 'd5x4ae6ze2og6sjo.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
